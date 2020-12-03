@@ -3,14 +3,20 @@ package project1;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Panel;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -19,10 +25,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Graph extends JPanel {
 	
@@ -63,7 +73,7 @@ public class Graph extends JPanel {
 	public double falseNegative = 0;
 
     // TODO: Add a private KNNModel variable
-    private KNNModel KNNModel;//o
+    private static KNNModel KNNModel;//o
     
     	
 	/**
@@ -295,20 +305,47 @@ public class Graph extends JPanel {
         Graph mainPanel = new Graph(testData, trainData);
 
         // Feel free to change the size of the panel
-        mainPanel.setPreferredSize(new Dimension(700, 600));
+        mainPanel.setPreferredSize(new Dimension(500, 400));
 
         /* creating the frame */
-        JFrame frame = new JFrame("CS 112 Lab Part 3");
+        JFrame frame = new JFrame("CS 112 Lab Part 4");
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int height = screenSize.height *2/3;
+        int width = screenSize.width * 1/3;
+        frame.setPreferredSize(new Dimension(width,height));
+    
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        /* Create Slider*/
+        JSlider slider = new JSlider(2,25,4);
+        slider.setPaintTrack(true);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        slider.setSnapToTicks(true);
+        
+        slider.setMajorTickSpacing(5);
+        slider.setMinorTickSpacing(1);
+        
+        JLabel label = new JLabel ("Choose the majority value:");
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton button = new JButton ("Run Test");
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        Container contentPane = frame.getContentPane();
+        contentPane.setLayout(new FlowLayout());
+        
         frame.getContentPane().add(mainPanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-     
+        
+        frame.getContentPane().add(label);
+        frame.getContentPane().add(slider);
+        frame.getContentPane().add(button);
+        
         double Accuracy = mainPanel.getAccuracy();
 		double Precision = mainPanel.getPrecision();
-		
-		
+
 
 		String label1 = "Accuracy:" + Accuracy;
 		String label2 = "Precision:" + Precision;
@@ -316,12 +353,40 @@ public class Graph extends JPanel {
 
 		JLabel myText1 = new JLabel(label1);
 		JLabel myText2 = new JLabel(label2);
-		Container contentPane = frame.getContentPane();
-		contentPane.setLayout(new GridLayout(2, 2));
-		frame.getContentPane().add(myText1, BorderLayout.CENTER);
-		frame.getContentPane().add(myText2, BorderLayout.CENTER);
+
+	
+		frame.getContentPane().add(myText1);
+		frame.getContentPane().add(myText2);
         
+        
+       button.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent evt) {
+        		int value = slider.getValue() *2 +1;
+        		KNNModel = new KNNModel(value);
+            	KNNModel.train((ArrayList<DataPoint>) trainData);
+            	double Accuracy = mainPanel.getAccuracy();
+         		double Precision = mainPanel.getPrecision();
+         		String label1 = "Accuracy:" + Accuracy;
+        		String label2 = "Precision:" + Precision;
+        		
+        		myText1.setText(label1);
+        		myText2.setText(label2);
+        	
+
+        	}
+        });
+   
+        slider.addChangeListener(new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+        		JSlider source =(JSlider)e.getSource();
+ 
+        	}
+        });
+    
     }
+    
+   
+    
       
     /* The main method runs createAndShowGui*/
     public static void main(String[] args) {
